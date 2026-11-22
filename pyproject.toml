@@ -77,7 +77,7 @@ mise = [
 
 [project.urls]
 Homepage = "https://github.com/MacHu-GWU/cookiecutter_pywf_kb_site_demo-project"
-Documentation = "https://kb-site-seed-demo.pages.dev/"
+Documentation = "https://cookiecutter-pywf-kb-site-demo.sanhe.me/"
 Repository = "https://github.com/MacHu-GWU/cookiecutter_pywf_kb_site_demo-project"
 Issues = "https://github.com/MacHu-GWU/cookiecutter_pywf_kb_site_demo-project/issues"
 Changelog = "https://github.com/MacHu-GWU/cookiecutter_pywf_kb_site_demo-project/blob/main/release-history.rst"

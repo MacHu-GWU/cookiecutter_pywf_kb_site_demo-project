@@ -17,9 +17,12 @@
 #             node is the exact version of mise.toml, so CI = local.
 #   - No pandoc: notebooks are parsed by MyST-NB, which does not need it.
 #
-# SECRETS (set once with `mise run setup-cloudflare-secrets`):
+# SECRETS and VARIABLES (set once with `mise run setup-cloudflare-secrets`,
+# which reads them from mise.toml [env]):
 #   CLOUDFLARE_API_TOKEN   Cloudflare user API token, permission Cloudflare Pages: Edit
 #   CLOUDFLARE_ACCOUNT_ID  Cloudflare account the token deploys to
+#   KB_DOMAIN              variable: the site is https://<KB_SUBDOMAIN>.<KB_DOMAIN>
+#   KB_SUBDOMAIN           variable: also the Cloudflare Pages project name
 # ==============================================================================
 
 name: Deploy Docs
@@ -40,8 +43,8 @@ concurrency:
 env:
   CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
   CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-  KB_CF_PAGES_PROJECT: "my-kb" # Must match mise.toml KB_CF_PAGES_PROJECT
-  KB_SITE_URL: "https://kb.example.com" # Must match mise.toml KB_SITE_URL
+  KB_DOMAIN: ${{ vars.KB_DOMAIN }}
+  KB_SUBDOMAIN: ${{ vars.KB_SUBDOMAIN }}
 
 jobs:
   deploy-doc:
@@ -54,10 +57,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v7
 
-      - name: Check Cloudflare secrets
+      - name: Check Cloudflare secrets and site variables
         run: |
-          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
-            echo "::error::CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID secrets are not set. Run: mise run setup-cloudflare-secrets"
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ] || [ -z "$KB_DOMAIN" ] || [ -z "$KB_SUBDOMAIN" ]; then
+            echo "::error::CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID secrets or KB_DOMAIN / KB_SUBDOMAIN variables are not set. Run: mise run setup-cloudflare-secrets"
             exit 1
           fi
 

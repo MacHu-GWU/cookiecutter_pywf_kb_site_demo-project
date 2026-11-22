@@ -23,8 +23,8 @@
 每个页面在 H1 正下方都有一行 AI 伴读链接 (`🌐 AI Reader`), 点开后可以在 Claude, ChatGPT, Gemini 等任意 AI 里把这篇翻成英文或者边读边问. 链接的编码和 `esc_mini_tools_chatbot_deeplink` 的 deep link 一样.
 
 - **它由 Sphinx 扩展 `cookiecutter_pywf_kb_site_demo.sphinx_ext` 在构建时根据 `doc_id` 生成并插到 H1 下面**, 所有格式 (`.md`, `.rst`, `.ipynb`) 都有. 源文件里不写.
-- 链接里的提示词只给 AI 一个地址: `https://kb-site-seed-demo.pages.dev/p/<doc_id>.md` (这篇的纯文本, notebook 是它的 Markdown 副本; 不提 HTML 网页), 所以文件夹搬家也不失效.
-- 首页 (`docs/source/README.md`) 例外: 没人会针对首页本身提问, 所以首页的链接是 "Ask AI about this whole knowledge base", 提示词让 AI 从 `https://kb-site-seed-demo.pages.dev/llms.txt` 出发检索全站来回答问题.
+- 链接里的提示词只给 AI 一个地址: `https://cookiecutter-pywf-kb-site-demo.sanhe.me/p/<doc_id>.md` (这篇的纯文本, notebook 是它的 Markdown 副本; 不提 HTML 网页), 所以文件夹搬家也不失效.
+- 首页 (`docs/source/README.md`) 例外: 没人会针对首页本身提问, 所以首页的链接是 "Ask AI about this whole knowledge base", 提示词让 AI 从 `https://cookiecutter-pywf-kb-site-demo.sanhe.me/llms.txt` 出发检索全站来回答问题.
 - **不要在源文件里手写这一行.** `blog_utils.py check` 发现源文件里有 deep link 的 URL 会报 ERROR.
 
 ---

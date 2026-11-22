@@ -194,7 +194,7 @@ Other files cite an entry by its anchor, `gotchas.md#<heading-slug>` (for exampl
 ### API token location
 
 - A **User API token** is under the avatar > My Profile > API Tokens (`https://dash.cloudflare.com/profile/api-tokens`); `wrangler whoami` says "logged in with an User API Token". An **Account API token** is under Manage account > Account API tokens; wrangler cannot infer the account from it, so `CLOUDFLARE_ACCOUNT_ID` is required.
-- Permission: Account > Cloudflare Pages > Edit, on the one account.
+- Permissions: the upload token (deploy, also a GitHub secret) gets Account > Cloudflare Pages > Edit only. The custom domain and its DNS record are set once in the dashboard, so no token with DNS rights is needed, and none reaches GitHub.
 
 ### Project detection
 

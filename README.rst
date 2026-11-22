@@ -23,7 +23,7 @@
 ------
 
 .. image:: https://img.shields.io/badge/Link-Docs-blue.svg
-    :target: https://kb-site-seed-demo.pages.dev/
+    :target: https://cookiecutter-pywf-kb-site-demo.sanhe.me/
 
 .. image:: https://img.shields.io/badge/Link-Install-blue.svg
     :target: `install`_
@@ -43,10 +43,10 @@
 
 Welcome to ``cookiecutter_pywf_kb_site_demo`` Documentation
 ==============================================================================
-.. image:: https://kb-site-seed-demo.pages.dev/_static/cookiecutter_pywf_kb_site_demo-logo.png
-    :target: https://kb-site-seed-demo.pages.dev/
+.. image:: https://cookiecutter-pywf-kb-site-demo.sanhe.me/_static/cookiecutter_pywf_kb_site_demo-logo.png
+    :target: https://cookiecutter-pywf-kb-site-demo.sanhe.me/
 
-A knowledge base site: Sphinx + furo + MyST Markdown + MyST-NB notebooks, one folder per document, documents linked by a stable random ``doc_id``, plain-text sources and ``llms.txt`` for AI agents, Pagefind search, deployed to Cloudflare Pages by GitHub Actions. The site: https://kb-site-seed-demo.pages.dev/
+A knowledge base site: Sphinx + furo + MyST Markdown + MyST-NB notebooks, one folder per document, documents linked by a stable random ``doc_id``, plain-text sources and ``llms.txt`` for AI agents, Pagefind search, deployed to Cloudflare Pages by GitHub Actions. The site: https://cookiecutter-pywf-kb-site-demo.sanhe.me/
 
 
 .. _install:

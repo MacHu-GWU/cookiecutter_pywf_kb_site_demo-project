@@ -1,17 +1,21 @@
 # -*- coding: utf-8 -*-
 
 """
-Set the Cloudflare secrets that deploy-doc.yml needs as GitHub Actions secrets
-of the repository in the current directory (its ``origin`` remote).
+Set what deploy-doc.yml needs on GitHub Actions of the repository in the
+current directory (its ``origin`` remote): the Cloudflare secrets, and the
+site's values as variables (CI runs without mise, so it cannot read mise.toml).
 
 The values come from the environment (locally: mise.toml [env] reads them
 from the secret store):
 
 - CLOUDFLARE_API_TOKEN: Cloudflare user API token (Cloudflare Pages: Edit)
 - CLOUDFLARE_ACCOUNT_ID: the Cloudflare account the token deploys to
+- KB_DOMAIN, KB_SUBDOMAIN: the site is https://<KB_SUBDOMAIN>.<KB_DOMAIN>;
+  plain values, so they become variables (readable in the logs), not secrets
 - GITHUB_TOKEN: GitHub token allowed to write the repository's secrets
 
-Idempotent: every run creates or updates the secrets. Values are never printed.
+Idempotent: every run creates or updates the secrets and variables. Secret
+values are never printed; variable values are.
 Needs PyGithub in the project venv (for example in a "mise" extra). Run it only on purpose: it changes
 the GitHub repository's settings.
 """
@@ -25,6 +29,7 @@ try:
     from github import Auth
     from github import Github
     from github import GithubException
+    from github import UnknownObjectException
 except ImportError:
     print("Error: PyGithub not installed")
     sys.exit(1)
@@ -35,6 +40,12 @@ ENV_GITHUB_TOKEN = "GITHUB_TOKEN"
 SECRETS = {
     "CLOUDFLARE_API_TOKEN": "CLOUDFLARE_API_TOKEN",
     "CLOUDFLARE_ACCOUNT_ID": "CLOUDFLARE_ACCOUNT_ID",
+}
+
+#: GitHub variable name -> environment variable that holds its value.
+VARIABLES = {
+    "KB_DOMAIN": "KB_DOMAIN",
+    "KB_SUBDOMAIN": "KB_SUBDOMAIN",
 }
 
 
@@ -68,17 +79,17 @@ def main():
         sys.exit(1)
 
     values = dict()
-    for secret_name, env_name in SECRETS.items():
+    for name, env_name in {**SECRETS, **VARIABLES}.items():
         value = os.environ.get(env_name)
         if not value:
             print(f"Error: {env_name} environment variable not set")
             sys.exit(1)
-        values[secret_name] = value
+        values[name] = value
 
     repo_fullname = get_repo_fullname()
     secrets_url = f"https://github.com/{repo_fullname}/settings/secrets/actions"
     print(
-        f"Setting GitHub Actions secrets on {repo_fullname} (preview at: {secrets_url})"
+        f"Setting GitHub Actions secrets and variables on {repo_fullname} (preview at: {secrets_url})"
     )
 
     gh = Github(auth=Auth.Token(github_token))
@@ -88,7 +99,8 @@ def main():
         print(f"Error: Could not access repository {repo_fullname}: {e}")
         sys.exit(1)
 
-    for secret_name, value in values.items():
+    for secret_name in SECRETS:
+        value = values[secret_name]
         try:
             repo.create_secret(
                 secret_name=secret_name,
@@ -99,6 +111,18 @@ def main():
             print(f"Error: Failed to create/update secret {secret_name}: {e}")
             sys.exit(1)
         print(f"✅ Set {secret_name}")
+
+    for name in VARIABLES:
+        value = values[name]
+        try:
+            try:
+                repo.get_variable(name).edit(value)
+            except UnknownObjectException:
+                repo.create_variable(name, value)
+        except GithubException as e:
+            print(f"Error: Failed to set variable {name}: {e}")
+            sys.exit(1)
+        print(f"✅ Set variable {name} = {value}")
 
 
 if __name__ == "__main__":

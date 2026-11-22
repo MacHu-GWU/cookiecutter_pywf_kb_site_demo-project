@@ -2,7 +2,8 @@
 #
 # One source of truth for the build, used by `mise run build-doc` and by
 # .github/workflows/deploy-doc.yml. Run from the repo root, after .venv
-# (uv.lock) and node_modules (package-lock.json) exist, with KB_SITE_URL set:
+# (uv.lock) and node_modules (package-lock.json) exist, with KB_DOMAIN and
+# KB_SUBDOMAIN set (mise.toml [env] locally, GitHub Actions variables in CI):
 # sh .mise/tasks/build-doc.sh
 #
 # Not executable on purpose: mise would turn an executable file in .mise/tasks/
@@ -10,7 +11,10 @@
 
 set -eu
 
-: "${KB_SITE_URL:?KB_SITE_URL is not set}"
+: "${KB_DOMAIN:?KB_DOMAIN is not set}"
+: "${KB_SUBDOMAIN:?KB_SUBDOMAIN is not set}"
+# The site's public root URL; docs/source/conf.py builds the same one.
+KB_SITE_URL="https://${KB_SUBDOMAIN}.${KB_DOMAIN}"
 # The skill's stdlib-only scripts (mise.toml [env] sets KB_SCRIPTS; CI uses
 # this default). Any python3 runs them: they need no package.
 KB_SCRIPTS="${KB_SCRIPTS:-.agents/skills/sphinx-myst-kb-site/scripts}"

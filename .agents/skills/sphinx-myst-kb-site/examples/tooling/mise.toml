@@ -1,8 +1,9 @@
 # The docs part of a site's mise.toml: merge these [env], [tools] and [tasks]
 # entries into the project's own file. `inst` (uv sync) is the project's
-# usual install task. mise.toml is the single source of truth for the KB_*
-# values; .github/workflows/deploy-doc.yml repeats them for CI, which runs
-# without mise (references/gotchas.md#no-mise-in-ci).
+# usual install task. mise.toml is the single source of truth for the site's
+# values (KB_DOMAIN, KB_SUBDOMAIN); `mise run setup-cloudflare-secrets` copies
+# them to GitHub Actions variables, since CI runs without mise
+# (references/gotchas.md#no-mise-in-ci).
 
 [env]
 # Local port of `mise run view-doc` (and of an editor's preview config): an
@@ -13,11 +14,12 @@ KB_DOCS_PORT = "48761"
 # variable twice (references/gotchas.md#secret-template-names).
 CLOUDFLARE_ACCOUNT_ID = "{{ env.CLOUDFLARE_ACCOUNT_ID | default(value=exec(command='<print the account id> || true')) }}"
 CLOUDFLARE_API_TOKEN = "{{ env.CLOUDFLARE_API_TOKEN | default(value=exec(command='<print the token> || true')) }}"
-# Cloudflare Pages project that hosts the site.
-KB_CF_PAGES_PROJECT = "my-kb"
-# Public root URL of the site: permalinks (conf.py, which has no default) and
-# llms.txt links (build-doc.sh).
-KB_SITE_URL = "https://kb.example.com"
+# The site lives at https://<KB_SUBDOMAIN>.<KB_DOMAIN>; the scripts build that
+# URL (conf.py, build-doc.sh), and KB_SUBDOMAIN also names the Cloudflare Pages
+# project (deploy-doc.sh). KB_DOMAIN is a zone on Cloudflare, in the account
+# above; "pages.dev" means no custom domain (https://<KB_SUBDOMAIN>.pages.dev).
+KB_DOMAIN = "example.com"
+KB_SUBDOMAIN = "my-kb"
 # The skill's stdlib-only scripts, called in place (build-doc.sh has the same default).
 KB_SCRIPTS = ".agents/skills/sphinx-myst-kb-site/scripts"
 
@@ -54,7 +56,7 @@ depends = ["build-doc"]
 run = "sh .mise/tasks/deploy-doc.sh" # shared with .github/workflows/deploy-doc.yml
 
 [tasks.setup-cloudflare-secrets]
-description = "Set CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID as GitHub Actions secrets (idempotent)"
+description = "Set the GitHub Actions secrets CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID and variables KB_DOMAIN, KB_SUBDOMAIN (idempotent)"
 depends = ["inst"]
 run = ".venv/bin/python .mise/tasks/setup-cloudflare-secrets.py"
 

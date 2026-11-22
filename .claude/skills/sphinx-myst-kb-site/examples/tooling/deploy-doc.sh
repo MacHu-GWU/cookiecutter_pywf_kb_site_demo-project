@@ -5,8 +5,9 @@
 # .github/workflows/deploy-doc.yml. Run from the repo root after the build:
 # sh .mise/tasks/deploy-doc.sh
 #
-# Needs CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID and KB_CF_PAGES_PROJECT
-# (mise.toml [env] locally, workflow env + secrets in CI).
+# Needs CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID and KB_SUBDOMAIN, which
+# also names the Cloudflare Pages project (mise.toml [env] locally, GitHub
+# Actions secrets and variables in CI).
 #
 # Not executable on purpose: mise would turn an executable file in .mise/tasks/
 # into a file task of the same name.
@@ -15,7 +16,8 @@ set -eu
 
 : "${CLOUDFLARE_API_TOKEN:?CLOUDFLARE_API_TOKEN is not set}"
 : "${CLOUDFLARE_ACCOUNT_ID:?CLOUDFLARE_ACCOUNT_ID is not set}"
-: "${KB_CF_PAGES_PROJECT:?KB_CF_PAGES_PROJECT is not set}"
+: "${KB_SUBDOMAIN:?KB_SUBDOMAIN is not set}"
+KB_CF_PAGES_PROJECT="${KB_SUBDOMAIN}"
 
 # The version pinned in package-lock.json, the same locally and in CI.
 wrangler() {

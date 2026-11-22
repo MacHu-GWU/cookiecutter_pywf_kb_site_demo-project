@@ -145,11 +145,15 @@ jinja_contexts = {
 }
 
 # -- knowledge base extension -------------------------------------------------
-# KB_SITE_URL: mise.toml [env] locally, the workflow env in CI; build-doc.sh
-# passes the same value to build_llms_txt.py. No default here: a build without
-# it stops instead of writing permalinks to a wrong site.
-kb_site_url = os.environ.get("KB_SITE_URL", "")
-if not kb_site_url:
+# The site lives at https://<KB_SUBDOMAIN>.<KB_DOMAIN> (mise.toml [env]
+# locally, GitHub Actions variables in CI); build-doc.sh builds the same URL
+# for build_llms_txt.py. No default here: a build without them stops instead
+# of writing permalinks to a wrong site.
+kb_domain = os.environ.get("KB_DOMAIN", "")
+kb_subdomain = os.environ.get("KB_SUBDOMAIN", "")
+if not (kb_domain and kb_subdomain):
     raise RuntimeError(
-        "KB_SITE_URL is not set (mise.toml [env]): run `mise run build-doc`"
+        "KB_DOMAIN / KB_SUBDOMAIN are not set (mise.toml [env]): "
+        "run `mise run build-doc`"
     )
+kb_site_url = f"https://{kb_subdomain}.{kb_domain}"
