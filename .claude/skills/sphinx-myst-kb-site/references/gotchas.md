@@ -178,7 +178,7 @@ Other files cite an entry by its anchor, `gotchas.md#<heading-slug>` (for exampl
 ### Noindex instead of robots
 
 - `_headers`: `/*` with `X-Robots-Tag: noindex, nofollow`. Do **not** `Disallow: /` in `robots.txt`: crawlers must fetch a page to see its noindex, and some agent fetch tools obey robots.txt.
-- Cloudflare Access (Zero Trust) is not an option for an agent-readable site: fetch tools cannot send service-token headers.
+- Cloudflare Access (Zero Trust) is off by default: agent fetch tools and the chatbots behind the AI Reader link cannot sign in or send service-token headers. If a site must be private, follow the reserved design in `access-control.md`.
 
 ### Text content type
 

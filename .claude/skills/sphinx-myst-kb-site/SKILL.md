@@ -99,6 +99,7 @@ Standard library only, no install; any `python3` runs them. Run them from anywhe
 - `examples/docs-source/`: a complete Sphinx source folder in English that builds as is. Read `conf.py` for every setting with its reason; `_ext/` for the Sphinx extension; `_templates/`, `_static/` and `_extra/` for the furo overrides, the search script and the hosting files; the demo documents for the writing patterns.
 - `examples/tooling/`: the two shared scripts, the GitHub Actions workflow, the docs part of `mise.toml`, `package.json`, the secrets setup script.
 - `references/build-and-deploy.md`: dependencies, the shared scripts, mise and CI, the one-time setup, and the sync checks.
+- `references/access-control.md`: why the site is public by default, and the reserved design (Cloudflare Zero Trust, e-mail one-time PIN, allow-list, service token for agents) for making it private.
 - `references/gotchas.md`: every known pitfall as symptom, cause and fix, from documents and rendering up to hosting, local tooling and CI. Open it when a build warns, a link or search result is wrong, or a deploy fails.
 
 To start a new site, copy `examples/docs-source/` to `docs/source/` and `examples/tooling/` into place (the two `.sh` files to `.mise/tasks/`, `deploy-doc.yml` to `.github/workflows/`, `mise.toml` merged into the project's), set the project values in `mise.toml`, the workflow and `conf.py`, then follow `references/build-and-deploy.md`.

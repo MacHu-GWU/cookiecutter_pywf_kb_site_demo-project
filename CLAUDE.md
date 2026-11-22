@@ -76,7 +76,7 @@ Skills come in three groups. Each group is used on its own; the user decides whe
 
 Unfinished work of this seed repo (the pair's future tpl repo is `cookiecutter-pywf_kb_site`):
 
-- **Access control (Cloudflare Access / Zero Trust) is not implemented.** The site is public with `X-Robots-Tag: noindex`. A private mode needs an Access application on `<project>.pages.dev` and `*.<project>.pages.dev`, an e-mail allow-list policy, a service token for the user's own agents (`curl` with `CF-Access-Client-Id` / `CF-Access-Client-Secret`), and a decision on the AI Reader link and `llms.txt`, which public chatbots can no longer read. Waiting for the user's design decision.
+- **Access control is designed but off by default.** The site is public with `X-Robots-Tag: noindex`, so that `llms.txt`, `p/<doc_id>.md` and the AI Reader link work for agents and public chatbots. The reserved design for a private site (Cloudflare Zero Trust, e-mail one-time PIN, allow-list, service token for the owner's agents) is in the `sphinx-myst-kb-site` skill, `references/access-control.md`; nothing of it is set up.
 - **Not deployed yet.** The Cloudflare Pages project `kb-site-seed-demo` does not exist, the GitHub Actions secrets are not set (`mise run setup-cloudflare-secrets`), and the GitHub repository is not live. No custom domain: `KB_SITE_URL` is the `pages.dev` address.
 - **seed-only files are not added yet**: `release-history-seed-repo.rst` and the `pywf-oss-changelog-seed-repo` skill come after the seed's features are complete.
 - **`.agents/skills/` drift is not checked**: `mise run sync-agents-skills` rewrites it, but nothing fails when someone forgets to run it.
