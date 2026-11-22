@@ -1,0 +1,16 @@
+cookiecutter_pywf_kb_site_demo
+==================================
+
+.. automodule:: cookiecutter_pywf_kb_site_demo
+    :members:
+
+sub packages and modules
+------------------------
+
+.. toctree::
+    :maxdepth: 1
+
+    example_package_1 <example_package_1/__init__>
+    api <api>
+    example_module_1 <example_module_1>
+    
