@@ -1,10 +1,16 @@
 # cookiecutter_pywf_kb_site_demo
 
+<!-- BEGIN project block: facts about THIS library. Edit freely. -->
+
 What this library does: see `README.rst`. In short: a knowledge base site (Sphinx + furo + MyST Markdown + MyST-NB, Pagefind search, `llms.txt` for agents) deployed to Cloudflare Pages, plus the Python package that holds its Sphinx extension.
 
 Package: `cookiecutter_pywf_kb_site_demo/` (import name `cookiecutter_pywf_kb_site_demo`).
 
 How to maintain this library: the `maintain-cookiecutter_pywf_kb_site_demo-*` skills, once they exist (create them with `pywf-oss-write-maintain-skill`).
+
+<!-- END project block -->
+
+<!-- BEGIN pywf-kb-site template block: shared by every repo built from the cookiecutter-pywf_kb_site template. Replace as a whole on template upgrade; do not edit per repo. -->
 
 ## Conventions
 
@@ -37,6 +43,7 @@ This repo follows the pywf open-source Python library template. **Before creatin
 - **Site values** live in `mise.toml` `[env]`, two of them: `KB_DOMAIN` (a Cloudflare zone, or `pages.dev` for no custom domain) and `KB_SUBDOMAIN` (the package name as a slug). Nothing derived is stored: the scripts build the site URL `https://<KB_SUBDOMAIN>.<KB_DOMAIN>` (`docs/source/conf.py`, `build-doc.sh`) and use `KB_SUBDOMAIN` as the Cloudflare Pages project name (`deploy-doc.sh`). CI runs without mise and reads both as GitHub Actions variables, which `mise run setup-cloudflare-secrets` copies from `mise.toml`: run it again after changing one. `KB_DOCS_PORT` and `KB_SCRIPTS` are local.
 - **Going live** (the `sphinx-myst-kb-site` skill, `references/build-and-deploy.md` section 6; the Pages upload token and account ID are in the secret store): push the repository; `mise run setup-codecov` and `mise run setup-cloudflare-secrets`; the next push to main deploys, and that first deploy creates the Pages project (`deploy-doc.sh`); then attach the custom domain once in the Cloudflare dashboard.
 - **Writing material.** Each document's `plan.md` and `resources/` are excluded from the build in `docs/source/conf.py`; `resources/` is also git-ignored.
+- **Access.** The site is public, hidden from search engines only (`X-Robots-Tag: noindex` in `_headers`), so that `llms.txt`, `p/<doc_id>.md` and the AI Reader link work for agents and public chatbots. A private site (Cloudflare Zero Trust, e-mail one-time PIN, allow-list, service token for the owner's agents) is designed but not set up: the `sphinx-myst-kb-site` skill, `references/access-control.md`. Turn it on only when the user asks.
 
 ## Skills
 
@@ -46,7 +53,7 @@ Skills come in three groups. Each group is used on its own; the user decides whe
 - **The writing family** (`blog-base` and the `blog-*` invokers): writing knowledge base content. It relies on the site rules of `sphinx-myst-kb-site` (its `blog_utils.py` imports `kb_docs.py`).
 - **Standalone skills** that mention no other skill: `sphinx-myst-kb-site` (the site), `sphinx-myst-kb-query` (answer questions from the live site), `sanhe-blog-language-style` (the author's writing style), and the image skills `editorial-ink-art`, `pypi-imgsqueeze`, `antigravity-image-gen`.
 
-**Two copies: `.claude/skills/` is the source, `.agents/skills/` is the Antigravity copy.** Claude Code writes the content; Antigravity polishes the style and makes the images (`blog-add-images` only generates images in Antigravity). After editing a knowledge base skill in `.claude/skills/`, run `mise run sync-agents-skills`; never edit `.agents/skills/` by hand. `antigravity-image-gen` exists only in `.agents/skills/`, the pywf-oss family only in `.claude/skills/`. Antigravity's entry point is `AGENTS.md`.
+**Two copies: `.claude/skills/` is the source, `.agents/skills/` is the Antigravity copy.** Claude Code writes the content; Antigravity polishes the style and makes the images (`blog-add-images` only generates images in Antigravity). After editing a knowledge base skill in `.claude/skills/`, run `mise run sync-agents-skills`; never edit `.agents/skills/` by hand. Nothing checks for drift, so a forgotten sync goes unnoticed. `antigravity-image-gen` exists only in `.agents/skills/`, the pywf-oss family only in `.claude/skills/`. Antigravity's entry point is `AGENTS.md`.
 
 | Job | Skill |
 | :--- | :--- |
@@ -73,11 +80,4 @@ Skills come in three groups. Each group is used on its own; the user decides whe
 | Writing spec, or not sure which `blog-*` skill | `blog-base` |
 | Write or polish in the author's style | `sanhe-blog-language-style` |
 
-## Current Status
-
-Unfinished work of this seed repo (the pair's future tpl repo is `cookiecutter-pywf_kb_site`):
-
-- **Access control is designed but off by default.** The site is public with `X-Robots-Tag: noindex`, so that `llms.txt`, `p/<doc_id>.md` and the AI Reader link work for agents and public chatbots. The reserved design for a private site (Cloudflare Zero Trust, e-mail one-time PIN, allow-list, service token for the owner's agents) is in the `sphinx-myst-kb-site` skill, `references/access-control.md`; nothing of it is set up.
-- **Not deployed yet.** Nothing exists on Cloudflare or GitHub for this repository. The first push to main creates the Pages project `cookiecutter-pywf-kb-site-demo`; the custom domain `cookiecutter-pywf-kb-site-demo.sanhe.me` is then attached by hand in the dashboard.
-- **seed-only files are not added yet**: `release-history-seed-repo.rst` and the `pywf-oss-changelog-seed-repo` skill come after the seed's features are complete.
-- **`.agents/skills/` drift is not checked**: `mise run sync-agents-skills` rewrites it, but nothing fails when someone forgets to run it.
+<!-- END pywf-kb-site template block -->
