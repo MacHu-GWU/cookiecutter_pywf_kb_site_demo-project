@@ -84,7 +84,7 @@ jobs:
       # Run pytest with coverage reporting. --extra test is a safety net: if uv ever has to rebuild
       # the .venv here, it installs the test extra too, so pytest is never missing.
       - name: "Run pytest"
-        run: "uv run --extra test pytest tests --cov=${{ env.PACKAGE_NAME }} --cov-report=xml --cov-report term-missing"
+        run: "uv run --extra test pytest tests .claude/skills/sphinx-myst-kb-site/tests --cov=${{ env.PACKAGE_NAME }} --cov-report=xml --cov-report term-missing"
       # Upload coverage report to Codecov
       # The 'if' condition checks if the current Python version should report coverage
       # For the first time setup, you should to goto codecov.io, enable your repo,

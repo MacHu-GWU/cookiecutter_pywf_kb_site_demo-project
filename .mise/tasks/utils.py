@@ -93,14 +93,9 @@ class ProjectConfig:
         return url
 
     @cached_property
-    def readthedocs_slug(self) -> str:
-        """Get ReadTheDocs slug (project name with _ replaced by -)."""
-        return self.project_name.replace("_", "-")
-
-    @cached_property
-    def readthedocs_url(self) -> str:
-        """Get ReadTheDocs documentation URL."""
-        return f"https://{self.readthedocs_slug}.readthedocs.io/"
+    def documentation_url(self) -> str:
+        """Get the docs site URL from pyproject.toml [project.urls] Documentation."""
+        return self.pyproject_data["project"]["urls"]["Documentation"]
 
 
 # Singleton instance for use across scripts
@@ -129,9 +124,5 @@ def get_project_description() -> str:
     return config.project_description
 
 
-def get_readthedocs_slug() -> str:
-    return config.readthedocs_slug
-
-
-def get_readthedocs_url() -> str:
-    return config.readthedocs_url
+def get_documentation_url() -> str:
+    return config.documentation_url

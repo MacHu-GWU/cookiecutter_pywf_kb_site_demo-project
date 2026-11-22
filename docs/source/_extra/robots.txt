@@ -1,0 +1,5 @@
+# Crawling is allowed on purpose: every response carries
+# "X-Robots-Tag: noindex, nofollow" (see _headers), which keeps pages out of
+# search results only if crawlers can fetch them.
+User-agent: *
+Allow: /

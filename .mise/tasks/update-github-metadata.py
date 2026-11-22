@@ -8,7 +8,7 @@ Required environment variables:
 
 The script reads project info from pyproject.toml and sets:
 - description: from pyproject.toml [project].description
-- homepage: ReadTheDocs documentation URL
+- homepage: the docs site, pyproject.toml [project.urls] Documentation
 """
 
 # ------------------------------------------------------------------------------
@@ -29,7 +29,7 @@ except ImportError:
 
 from utils import get_github_repo_info
 from utils import get_project_description
-from utils import get_readthedocs_url
+from utils import get_documentation_url
 
 
 def main():
@@ -44,7 +44,7 @@ def main():
     owner, repo_name = get_github_repo_info()
     repo_fullname = f"{owner}/{repo_name}"
     description = get_project_description()
-    homepage = get_readthedocs_url()
+    homepage = get_documentation_url()
 
     print(f"Updating GitHub repository metadata: {repo_fullname}")
     repo_url = f"https://github.com/{repo_fullname}"

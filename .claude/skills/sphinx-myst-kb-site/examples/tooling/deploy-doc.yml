@@ -1,0 +1,117 @@
+# ==============================================================================
+# Deploy the knowledge base to Cloudflare Pages on every push to main.
+# ==============================================================================
+#
+# No mise in CI: it adds a download and setup time, and every
+# `mise run` evaluates all mise.toml [env] templates (commands that read
+# secrets from a local secret store, which can only fail here). CI calls the
+# same two scripts as the mise tasks instead, so the build and deploy commands
+# live in one place:
+#   .mise/tasks/build-doc.sh   Sphinx + Pagefind  (mise run build-doc)
+#   .mise/tasks/deploy-doc.sh  wrangler deploy    (mise run deploy-doc)
+#
+# Speed:
+#   - Python: uv.lock -> cached .venv, `uv sync`
+#   - Node:   package-lock.json -> cached node_modules, `npm ci` only on a miss.
+#             pagefind and wrangler are the exact versions of the lockfile, and
+#             node is the exact version of mise.toml, so CI = local.
+#   - No pandoc: notebooks are parsed by MyST-NB, which does not need it.
+#
+# SECRETS (set once with `mise run setup-cloudflare-secrets`):
+#   CLOUDFLARE_API_TOKEN   Cloudflare user API token, permission Cloudflare Pages: Edit
+#   CLOUDFLARE_ACCOUNT_ID  Cloudflare account the token deploys to
+# ==============================================================================
+
+name: Deploy Docs
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch: # manual redeploy of main from the Actions tab
+
+permissions:
+  contents: read
+
+# A newer push supersedes a deploy still running.
+concurrency:
+  group: deploy-doc
+  cancel-in-progress: true
+
+env:
+  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+  CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+  KB_CF_PAGES_PROJECT: "my-kb" # Must match mise.toml KB_CF_PAGES_PROJECT
+  KB_SITE_URL: "https://kb.example.com" # Must match mise.toml KB_SITE_URL
+
+jobs:
+  deploy-doc:
+    name: "📚 Deploy docs to Cloudflare Pages"
+    # Deploys always go to the production branch, so only main may run them
+    # (workflow_dispatch can be started on any branch).
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Check Cloudflare secrets
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "::error::CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID secrets are not set. Run: mise run setup-cloudflare-secrets"
+            exit 1
+          fi
+
+      # --- Tools --------------------------------------------------------------
+
+      - name: Setup Python 3.12
+        uses: actions/setup-python@v7
+        id: setup-python
+        with:
+          python-version: "3.12" # Must match mise.toml `python = "3.12"`
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v10.3.0 # no floating major tag, pin the full version
+        with:
+          # The .venv cache below makes uv's own cache redundant.
+          enable-cache: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        id: setup-node
+        with:
+          node-version: "24.15.0" # Must match mise.toml `node = "24.15.0"`
+
+      # --- Caches -------------------------------------------------------------
+
+      # The key uses the FULL Python version (e.g. 3.12.13): a .venv points at its
+      # interpreter's path. The "doc" prefix keeps it apart from a test workflow's venv.
+      - name: Cache .venv
+        uses: actions/cache@v6
+        with:
+          path: .venv
+          key: venv-doc-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('uv.lock') }}
+
+      # Same idea as the .venv cache: the installed tree, keyed on the lockfile.
+      # The node version is in the key because packages may ship native binaries.
+      - name: Cache node_modules
+        uses: actions/cache@v6
+        id: cache-node-modules
+        with:
+          path: node_modules
+          key: node-modules-${{ runner.os }}-${{ steps.setup-node.outputs.node-version }}-${{ hashFiles('package-lock.json') }}
+
+      # --- Build and deploy ---------------------------------------------------
+
+      # Always run: on a cache hit it only checks the .venv (well under a second).
+      - name: Install Python dependencies
+        run: uv sync --locked --extra doc # fail on a stale uv.lock instead of re-locking
+
+      - name: Install Node CLIs (pagefind, wrangler)
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        run: npm ci --no-audit --no-fund
+
+      - name: Build docs
+        run: sh .mise/tasks/build-doc.sh
+
+      - name: Deploy to Cloudflare Pages
+        run: sh .mise/tasks/deploy-doc.sh

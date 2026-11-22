@@ -1,0 +1,10 @@
+{#- furo's search box plus a Pagefind type-as-you-search dropdown (_static/js/kb-search.js).
+    Enter without a highlighted result still opens Sphinx's own search page. -#}
+<form class="sidebar-search-container" method="get" action="{{ pathto('search') }}" role="search"
+      data-pagefind="{{ pathto('pagefind/pagefind.js', 1) }}"
+      data-titles="{{ pathto('kb-titles.json', 1) }}">
+  <input class="sidebar-search" placeholder="{{ _("Search") }}" name="q" aria-label="{{ _("Search" ) }}" autocomplete="off">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div>

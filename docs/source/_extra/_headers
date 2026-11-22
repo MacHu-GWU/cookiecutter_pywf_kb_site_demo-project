@@ -1,0 +1,16 @@
+# Cloudflare Pages response headers (https://developers.cloudflare.com/pages/configuration/headers/).
+# Public, but kept out of search engines. Do not "Disallow: /" in robots.txt
+# instead: crawlers must be allowed to fetch a page to see its noindex, and
+# some AI fetch tools obey robots.txt.
+/*
+  X-Robots-Tag: noindex, nofollow
+
+# Raw sources for agents: plain UTF-8 text shown in the browser, non-ASCII text intact.
+/_sources/*
+  Content-Type: text/plain; charset=utf-8
+
+/p/*
+  Content-Type: text/plain; charset=utf-8
+
+/llms.txt
+  Content-Type: text/plain; charset=utf-8

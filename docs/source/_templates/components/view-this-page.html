@@ -1,0 +1,12 @@
+{#- Replaces furo's eye icon with a row of buttons: copy the doc_id, copy the
+    permalink, copy the agent text link (click to copy, _static/js/kb-copy.js),
+    and open the agent text. The UI text stays English on every site: these
+    are identifiers and URLs, read the same way in any language. -#}
+{%- if kb_doc_id is defined %}
+<div class="view-this-page kb-doc-meta" data-pagefind-ignore>
+  <button type="button" class="kb-copy kb-chip" data-copy="{{ kb_doc_id }}" data-copied="Copied" title="Copy the doc_id">ID <code>{{ kb_doc_id }}</code></button>
+  <button type="button" class="kb-copy kb-chip" data-copy="{{ kb_permalink }}" data-copied="Copied" title="Copy the permanent link to this page, {{ kb_permalink }} (it survives moves)">Copy link</button>
+  <button type="button" class="kb-copy kb-chip" data-copy="{{ kb_text_url }}" data-copied="Copied" title="Copy the link to this page's plain-text source, {{ kb_text_url }} (for AI)">Copy raw link</button>
+  <a class="kb-chip" href="{{ pathto(kb_text_path, 1) }}" title="Open the plain-text source">raw ↗</a>
+</div>
+{%- endif %}

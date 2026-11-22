@@ -4,8 +4,8 @@
     {
       "name": "docs-html",
       "runtimeExecutable": "sh",
-      "runtimeArgs": ["-c", "exec .venv/bin/python -m http.server \"${PORT:-8765}\" --directory docs/build/html"],
-      "port": 8765
+      "runtimeArgs": ["-c", "exec .venv/bin/python .claude/skills/sphinx-myst-kb-site/scripts/serve_docs.py --port \"${PORT:-47231}\" --directory docs/build/html"],
+      "port": 47231
     }
   ]
 }

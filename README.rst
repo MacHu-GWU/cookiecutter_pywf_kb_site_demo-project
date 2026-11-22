@@ -1,8 +1,4 @@
 
-.. image:: https://readthedocs.org/projects/cookiecutter-pywf-kb-site-demo/badge/?version=latest
-    :target: https://cookiecutter-pywf-kb-site-demo.readthedocs.io/en/latest/
-    :alt: Documentation Status
-
 .. image:: https://github.com/MacHu-GWU/cookiecutter_pywf_kb_site_demo-project/actions/workflows/main.yml/badge.svg
     :target: https://github.com/MacHu-GWU/cookiecutter_pywf_kb_site_demo-project/actions?query=workflow:CI
 
@@ -26,8 +22,8 @@
 
 ------
 
-.. image:: https://img.shields.io/badge/Link-API-blue.svg
-    :target: https://cookiecutter-pywf-kb-site-demo.readthedocs.io/en/latest/py-modindex.html
+.. image:: https://img.shields.io/badge/Link-Docs-blue.svg
+    :target: https://kb-site-seed-demo.pages.dev/
 
 .. image:: https://img.shields.io/badge/Link-Install-blue.svg
     :target: `install`_
@@ -47,10 +43,10 @@
 
 Welcome to ``cookiecutter_pywf_kb_site_demo`` Documentation
 ==============================================================================
-.. image:: https://cookiecutter-pywf-kb-site-demo.readthedocs.io/en/latest/_static/cookiecutter_pywf_kb_site_demo-logo.png
-    :target: https://cookiecutter-pywf-kb-site-demo.readthedocs.io/en/latest/
+.. image:: https://kb-site-seed-demo.pages.dev/_static/cookiecutter_pywf_kb_site_demo-logo.png
+    :target: https://kb-site-seed-demo.pages.dev/
 
-Documentation for ``cookiecutter_pywf_kb_site_demo``.
+A knowledge base site: Sphinx + furo + MyST Markdown + MyST-NB notebooks, one folder per document, documents linked by a stable random ``doc_id``, plain-text sources and ``llms.txt`` for AI agents, Pagefind search, deployed to Cloudflare Pages by GitHub Actions. The site: https://kb-site-seed-demo.pages.dev/
 
 
 .. _install:

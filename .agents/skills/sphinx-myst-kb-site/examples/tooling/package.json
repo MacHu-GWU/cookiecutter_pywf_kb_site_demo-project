@@ -1,0 +1,9 @@
+{
+  "name": "kb-tools",
+  "private": true,
+  "description": "Node CLIs of the docs build, pinned like uv.lock pins Python: npm install (local), npm ci (CI).",
+  "devDependencies": {
+    "pagefind": "1.6.0",
+    "wrangler": "4.80.0"
+  }
+}

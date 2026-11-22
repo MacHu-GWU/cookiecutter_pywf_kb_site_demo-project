@@ -1,19 +1,37 @@
-# See claude code environment variables documents at https://code.claude.com/docs/en/settings
+# Environment of every `mise run` task. The single source of truth for the
+# docs site's values (KB_*); .github/workflows/deploy-doc.yml repeats them for CI.
 [env]
+# Local port of `mise run view-doc` (and of .claude/launch.json): an uncommon
+# one, so it never fights with other dev servers.
+KB_DOCS_PORT = "47231"
 # A secret that cannot be read becomes an empty string, so mise still loads and tasks report it as not set.
 GITHUB_TOKEN = "{{ exec(command='uvx --from home-secret-toml hst get github.accounts.sh.users.sh.secrets.dev.value || true') }}"
 CODECOV_TOKEN = "{{ exec(command='uvx --from home-secret-toml hst get codecov_io.accounts.sh.users.sh.secrets.dev.value || true') }}"
-READTHEDOCS_TOKEN = "{{ exec(command='uvx --from home-secret-toml hst get readthedocs.accounts.sh.users.sh.secrets.dev.value || true') }}"
 PYPI_TOKEN = "{{ exec(command='uvx --from home-secret-toml hst get pypi.accounts.sh.token || true') }}"
+# Cloudflare account of the token below. Pinned so wrangler never falls back
+# to an account cached in .wrangler/cache/.
+# Each `env.X | default(...)` must name its own variable X: an exported X wins.
+CLOUDFLARE_ACCOUNT_ID = "{{ env.CLOUDFLARE_ACCOUNT_ID | default(value=exec(command='uvx --from home-secret-toml hst get cloudflare.accounts.sh.account_id || true')) }}"
+# Cloudflare Pages upload token for wrangler (deploy-doc). An already exported
+# CLOUDFLARE_API_TOKEN (e.g. a GitHub Actions secret) wins over the secret store.
+CLOUDFLARE_API_TOKEN = "{{ env.CLOUDFLARE_API_TOKEN | default(value=exec(command='uvx --from home-secret-toml hst get cloudflare.accounts.sh.users.sh.secrets.cloudflare_pages_upload.value || true')) }}"
+# Cloudflare Pages project that hosts the knowledge base (https://kb-site-seed-demo.pages.dev)
+KB_CF_PAGES_PROJECT = "kb-site-seed-demo"
+# Public root URL of the site: permalinks (conf.py) and llms.txt links (build-doc).
+# conf.py has no default: a build without it fails instead of linking a wrong site.
+KB_SITE_URL = "https://kb-site-seed-demo.pages.dev"
+# The sphinx-myst-kb-site skill's stdlib-only scripts, called in place by the
+# docs tasks and by build-doc.sh (whose default is the same path, for CI).
+KB_SCRIPTS = ".claude/skills/sphinx-myst-kb-site/scripts"
 # Make uv use the mise Python below (first ``python`` on PATH), not a uv-managed one
 # or a global ``~/.config/uv/.python-version`` pin. ``[tools] python`` is the one dev version.
 UV_PYTHON = "python"
 
 [tools]
-python = "3.12" # the dev Python; .readthedocs.yml reads it from here
+python = "3.12" # the dev Python; must match python-version in .github/workflows/deploy-doc.yml
 uv = "latest"
 claude = "latest"
-pandoc = "3.9" # Use pandoc 3.9 - latest stable major version as of 2026-04
+node = "24.15.0" # exact: must match node-version in .github/workflows/deploy-doc.yml; runs pagefind and wrangler (package.json)
 
 # === Tasks ===
 # Python Environment Management
@@ -44,12 +62,13 @@ uv export --format requirements-txt --extra mise --no-emit-project --no-hashes -
 # Testing
 [tasks.test]
 description = "🧪 Run unit tests using pytest (scans test files automatically)"
-run = ".venv/bin/pytest tests"
+run = ".venv/bin/pytest tests .claude/skills/sphinx-myst-kb-site/tests"
 depends = ["inst"]
 
 [tasks.cov]
 description = "🧪📊 Run unit tests with code coverage using pytest (generates HTML report in htmlcov/)"
-run = ".venv/bin/pytest tests -s --tb=native --cov=cookiecutter_pywf_kb_site_demo --cov-report term-missing --cov-report html:htmlcov"
+# The skill's tests run too; coverage measures the package only.
+run = ".venv/bin/pytest tests .claude/skills/sphinx-myst-kb-site/tests -s --tb=native --cov=cookiecutter_pywf_kb_site_demo --cov-report term-missing --cov-report html:htmlcov"
 depends = ["inst"]
 
 [tasks.view-cov]
@@ -58,33 +77,69 @@ run = "open htmlcov/index.html"
 
 # Code Quality
 [tasks.format]
-description = "🎨 Format all Python code with ruff (package, tests, mise task scripts, pywf-oss skill scripts)"
-run = "uvx ruff format cookiecutter_pywf_kb_site_demo tests .mise/tasks .claude/skills/pywf-oss-base"
+description = "🎨 Format all Python code with ruff (package, tests, mise task scripts, pywf-oss, blog-* and sphinx-myst-kb-site skill scripts)"
+run = "uvx ruff format cookiecutter_pywf_kb_site_demo tests .mise/tasks .claude/skills/pywf-oss-base .claude/skills/blog-base .claude/skills/blog-intake .claude/skills/sphinx-myst-kb-site"
 
 [tasks.lint]
-description = "🔍 Lint Python code with ruff (unused/undefined names) and check one imported name per statement"
+description = "🔍 Lint Python code with ruff (unused/undefined names), check one imported name per statement, and check the docs site's copies of the sphinx-myst-kb-site examples"
 run = """
-uvx ruff check --select F401,F821,F841 cookiecutter_pywf_kb_site_demo tests .mise/tasks .claude/skills/pywf-oss-base
-python3 .claude/skills/pywf-oss-base/scripts/check_one_import_per_line.py --paths cookiecutter_pywf_kb_site_demo tests .mise/tasks .claude/skills/pywf-oss-base
+uvx ruff check --select F401,F821,F841 cookiecutter_pywf_kb_site_demo tests .mise/tasks .claude/skills/pywf-oss-base .claude/skills/blog-base .claude/skills/blog-intake .claude/skills/sphinx-myst-kb-site
+python3 .claude/skills/pywf-oss-base/scripts/check_one_import_per_line.py --paths cookiecutter_pywf_kb_site_demo tests .mise/tasks .claude/skills/pywf-oss-base .claude/skills/blog-base .claude/skills/blog-intake .claude/skills/sphinx-myst-kb-site
+python3 "$KB_SCRIPTS/check_example_sync.py"
 """
 
 # Documentation
+[tasks.inst-node]
+description = "💾 Install the Node CLIs pinned in package-lock.json (pagefind, wrangler) into node_modules/"
+run = "npm install --no-audit --no-fund"
+
 [tasks.build-doc]
-description = "📚 Build Sphinx documentation using sphinx-build (generates HTML in docs/build/html/)"
-depends = ["inst"]
-run = """
-rm -rf docs/build
-.venv/bin/sphinx-build -b html docs/source docs/build/html
-"""
+description = "📚 Build Sphinx documentation, then the Pagefind search index (generates HTML in docs/build/html/)"
+depends = ["inst", "inst-node"]
+run = "sh .mise/tasks/build-doc.sh" # shared with .github/workflows/deploy-doc.yml
 
 [tasks.view-doc]
-description = "👀📚 Open built Sphinx documentation in browser (requires 'build-doc' task to run first)"
-run = "open docs/build/html/index.html"
+description = "👀📚 (Re)start the docs server on http://localhost:$KB_DOCS_PORT and open it (Pagefind search needs http, not file://); idempotent; Ctrl+C to stop"
+# Idempotent: whatever already listens on $KB_DOCS_PORT (an earlier view-doc,
+# Claude's preview server) is killed first, then a fresh server starts.
+run = """
+pids=$(lsof -tiTCP:$KB_DOCS_PORT -sTCP:LISTEN || true)  # lsof exits 1 when the port is free
+if [ -n "$pids" ]; then
+  echo "Stopping the server on port $KB_DOCS_PORT (pid $pids)"
+  kill $pids
+  while lsof -tiTCP:$KB_DOCS_PORT -sTCP:LISTEN >/dev/null; do sleep 0.1; done
+fi
+(sleep 1 && open http://localhost:$KB_DOCS_PORT/) &
+# UTF-8 aware server: python -m http.server omits charset=utf-8, so CJK text shows as mojibake.
+exec python3 "$KB_SCRIPTS/serve_docs.py" --port $KB_DOCS_PORT --directory docs/build/html
+"""
 
-[tasks.notebook-to-markdown]
-description = "📓 Convert Jupyter notebooks to Markdown for AI knowledge base (processes .ipynb files)"
-run = ".venv/bin/python .mise/tasks/notebook-to-markdown.py"
+# Cloudflare Pages (change an external service: run only on purpose)
+[tasks.setup-cloudflare-secrets]
+description = "🔑 Set CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID as GitHub Actions secrets for deploy-doc.yml (idempotent)"
 depends = ["inst"]
+run = ".venv/bin/python .mise/tasks/setup-cloudflare-secrets.py"
+
+[tasks.deploy-doc]
+description = "🚀 One step: build the docs (Sphinx + Pagefind), create the Pages project if missing, upload docs/build/html to Cloudflare Pages"
+depends = ["build-doc"]
+run = "sh .mise/tasks/deploy-doc.sh" # shared with .github/workflows/deploy-doc.yml
+
+[tasks.new-doc-id]
+description = "🆔 Print a new random doc_id (12 chars of [A-Za-z]) for a new knowledge base document"
+run = 'python3 "$KB_SCRIPTS/new_doc_id.py"'
+
+[tasks.nb-to-md]
+description = "📓 Write a compact Markdown copy of every README.ipynb to docs/build/html/_sources/<path>/README.md (for agents and llms.txt); also runs in build-doc"
+run = 'python3 "$KB_SCRIPTS/nb_to_md.py"'
+
+[tasks.sync-agents-skills]
+description = "🔁 Port the knowledge base skills from .claude/skills/ (the source) to .agents/skills/ (Antigravity); run after editing one of them"
+run = "python3 .mise/tasks/sync-agents-skills.py"
+
+[tasks.lint-doc]
+description = "🔎 Lint every document's metadata (doc_id, quoted two-sentence description, H1); also runs first in build-doc"
+run = 'python3 "$KB_SCRIPTS/lint_docs.py"'
 
 # Building & Publishing & Release
 [tasks.build]
@@ -111,11 +166,6 @@ depends = ["inst"]
 [tasks.setup-codecov]
 description = "⚙️ Setup Codecov upload token on GitHub Actions secrets using PyGithub and httpx2"
 run = ".venv/bin/python .mise/tasks/setup-codecov.py"
-depends = ["inst"]
-
-[tasks.setup-readthedocs]
-description = "⚙️ Setup ReadTheDocs project and GitHub webhook using httpx2 API client"
-run = ".venv/bin/python .mise/tasks/setup-readthedocs.py"
 depends = ["inst"]
 
 [tasks.update-github-metadata]

@@ -2,6 +2,7 @@
 cookiecutter_pywf_kb_site_demo.egg-info/
 docs/source/**/index.md
 .claude/claude-code-message*
+docs/source/**/resources/
 tmp/
 
 # Optional community Agent Skills (catalog: .claude/skills/pywf-oss-base/assets/community-skills.toml).
@@ -151,3 +152,9 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+
+# wrangler (Cloudflare Pages) local cache, e.g. the last used account
+.wrangler/
+
+# npm: the CLIs pinned in package.json / package-lock.json (pagefind, wrangler)
+node_modules/

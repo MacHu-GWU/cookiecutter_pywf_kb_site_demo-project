@@ -1,0 +1,115 @@
+/* Knowledge base styles. */
+
+/* Right side "On this page" navigation: H2 and H3 only (H1 is the page title). */
+.toc-tree > ul > li > ul > li > ul > li > ul {
+    display: none;
+}
+
+/* doc_id / permalink / raw link / raw source buttons at the top of each page. */
+.kb-doc-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+    align-items: center;
+    font-size: var(--font-size--small);
+}
+
+/* One look for the copy buttons and the raw link: small outlined pills, so
+   they read as buttons rather than as stray text next to the title. */
+.kb-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3em;
+    padding: 0.15rem 0.6rem;
+    border: 1px solid var(--color-background-border);
+    border-radius: 999px;
+    background: var(--color-background-secondary);
+    color: var(--color-foreground-secondary);
+    font: inherit;
+    font-size: var(--font-size--small);
+    line-height: 1.5;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.kb-chip:hover {
+    border-color: var(--color-brand-primary);
+    color: var(--color-brand-primary);
+    text-decoration: none;
+}
+
+a.kb-chip:visited {
+    color: var(--color-foreground-secondary);
+}
+
+.kb-chip code {
+    font-size: inherit;
+    background: none;
+    border: 0;
+    padding: 0;
+}
+
+/* Click-to-copy (_static/js/kb-copy.js): a check mark and "Copied" for 2 s. */
+.kb-copy {
+    cursor: copy;
+}
+
+.kb-copy.kb-copied {
+    border-color: var(--color-brand-primary);
+    color: var(--color-brand-primary);
+}
+
+.kb-copy.kb-copied::after {
+    content: "✓ " attr(data-copied);
+}
+
+/* Pagefind type-as-you-search dropdown (_static/js/kb-search.js). */
+.kb-search-panel {
+    position: fixed;
+    z-index: 100;
+    width: min(36rem, calc(100vw - 2rem));
+    max-height: 70vh;
+    overflow-y: auto;
+    background: var(--color-background-primary);
+    border: 1px solid var(--color-background-border);
+    border-radius: 0.5rem;
+    box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.25);
+}
+
+.kb-search-item {
+    display: block;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--color-background-border);
+    color: var(--color-foreground-primary);
+    text-decoration: none;
+}
+
+.kb-search-item:hover,
+.kb-search-item.kb-search-active {
+    background: var(--color-background-hover);
+}
+
+.kb-search-title {
+    font-weight: 600;
+}
+
+.kb-search-section {
+    font-weight: normal;
+    color: var(--color-foreground-muted);
+}
+
+.kb-search-excerpt {
+    font-size: var(--font-size--small);
+    color: var(--color-foreground-secondary);
+}
+
+.kb-search-panel mark {
+    background: var(--color-highlighted-background);
+    color: inherit;
+}
+
+.kb-search-empty {
+    padding: 0.5rem 0.75rem;
+    color: var(--color-foreground-muted);
+}

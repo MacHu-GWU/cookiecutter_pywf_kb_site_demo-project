@@ -49,8 +49,6 @@ def main():
             categories["GitHub Release Management"].append(task)
         elif name.startswith("setup-") or name == "update-github-metadata":
             categories["CI/CD Setup"].append(task)
-        elif name == "notebook-to-markdown":
-            categories["Documentation Tools"].append(task)
 
     # Generate Markdown
     output = ["# Available Mise Tasks", ""]
