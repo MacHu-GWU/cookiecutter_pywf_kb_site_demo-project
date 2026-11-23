@@ -18,7 +18,7 @@ x.y.z (Backlog)
 **Miscellaneous**
 
 
-0.1.1 (2026-11-22)
+1.0.0 (2026-11-22)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 First release. The seed starts from the pywf open-source Python library template and replaces its Read the Docs documentation with a knowledge base site, ported from a working knowledge base. This section describes everything a project generated from this seed gets.
 
